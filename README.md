@@ -6,7 +6,6 @@ Meet **Aura**: an agentic AI support system (demo'd on the fictional store *Nimb
 
 **UI highlights:** animated aurora background, glassmorphism panels, welcome hero with one-click demos, typewriter "token streaming" replies, tabbed Trace / Actions / Knowledge panel, live session stats, and 👍/👎 feedback on every answer (the seed data for my eval-dashboard project).
 
-> **Project 1 of 3** in my Agentic AI portfolio: foundation agent → [evaluation dashboard] → [multi-agent command center].
 
 ## ✨ What it demonstrates
 

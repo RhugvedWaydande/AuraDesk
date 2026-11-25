@@ -1,4 +1,4 @@
-# 🗺️ Code Tour — Your Interview Cheat-Sheet
+# 🗺️ Code Tour — A Guided Walkthrough
 
 Read this top-to-bottom once and you'll be able to explain every line of this project.
 
@@ -47,7 +47,7 @@ ticket and escalates instead. That's policy-enforced human-in-the-loop.
 ### `src/agent/retriever.js` — RAG retrieval
 A mini search engine: tokenizes the question, strips stop-words, scores each
 knowledge article (+3 for tag match, +1 for body match), returns top-3.
-**Expected interview question:** *"Why keyword search and not embeddings?"*
+**Common question:** *"Why keyword search and not embeddings?"*
 **Answer:** "The pipeline shape — query → rank → top-k → feed to the generator —
 is identical to a vector-DB setup. I used lexical scoring so the ranking is
 fully transparent and debuggable; swapping in embeddings + cosine similarity
@@ -115,7 +115,7 @@ touches exactly one file.
 The gradient-orb logo as inline SVG (crisp at any size, zero image assets),
 with an optional CSS "pulse ring" to show the agent is online.
 
-### Three more UX decisions worth defending in interviews
+### Three more UX decisions
 **Dark/light theming:** the whole palette lives in CSS variables on `:root`;
 light mode is one `data-theme="light"` attribute on `<html>` that swaps the
 variables — near-zero duplicated CSS. **Collapsible trace panel:** the trace
@@ -137,7 +137,7 @@ mounting `<App />` into `#root`.
 
 ---
 
-## A real bug story worth telling in interviews 🐛
+## A real bug story 🐛
 
 While building this, the app once rendered a completely blank page. The lesson:
 
@@ -155,7 +155,7 @@ While building this, the app once rendered a completely blank page. The lesson:
 
 ---
 
-## Questions interviewers will ask (and your answers)
+## Design FAQ
 
 **"What makes this 'agentic' rather than a chatbot?"**
 It perceives, plans (intent + retrieval), acts through tools with real side

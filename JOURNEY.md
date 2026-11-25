@@ -1,9 +1,7 @@
 # 🛠️ The AuraDesk Build Journal — from empty folder to live URL
 
-> **What this file is:** the honest, chronological story of how this project was built —
-> every decision, every bug, every redesign, with screenshots. Read it before an interview:
-> the *story* of a project ("we hit X, diagnosed Y, fixed it with Z") is worth more in an
-> interview than the finished code itself.
+> **What this file is:** the development log of this project — every decision, every bug,
+> and every redesign, in chronological order, with screenshots.
 >
 > **Live result:** https://auradesk-six.vercel.app
 
@@ -11,8 +9,7 @@
 
 ## 📍 Chapter 0 — Why this project exists
 
-**The goal:** build a job-ready portfolio of 3 agentic-AI projects, in a deliberate
-beginner → pro ladder:
+**The goal:** build a series of 3 agentic-AI projects of increasing depth:
 
 1. 🥉 **AuraDesk** (this project) — a single AI support agent that proves the fundamentals:
    RAG, tool calling, guardrails, human-in-the-loop, observability.
@@ -20,13 +17,13 @@ beginner → pro ladder:
    (the 👍/👎 feedback buttons in AuraDesk were added specifically to feed this project).
 3. 🥇 **AI Agent Command Center** — the capstone: multiple agents orchestrated together.
 
-**Why a support agent first?** Because it's the one agentic use case every interviewer
+**Why a support agent first?** Because it's the one agentic use case everyone
 instantly understands, and it naturally requires every core skill: the agent must *know
 things* (RAG), *do things* (tools), *refuse things* (guardrails), and *give up gracefully*
 (human escalation).
 
 **The stack decision:** React + Vite, **pure front-end, no backend**.
-- *Why no backend?* A portfolio demo must work the moment a recruiter opens the link —
+- *Why no backend?* The demo must work the moment anyone opens the link —
   no API keys, no servers to keep alive, no cold starts, zero hosting cost.
 - *How can an "AI" work without a backend?* The agent pipeline (retrieval, intent
   classification, tool execution, guardrails) is 100% real deterministic code running in
@@ -35,9 +32,9 @@ things* (RAG), *do things* (tools), *refuse things* (guardrails), and *give up g
   This is the **LLM abstraction** pattern — one file (`src/agent/llm.js`) knows which
   "brain" is plugged in; nothing else cares.
 
-**Interview line:** *"I separated the agent's decision-making from the language generation,
-so the system demos deterministically without a key and upgrades to a live LLM by adding
-one env var — no other file changes."*
+**In one sentence:** the agent's decision-making is separated from the language
+generation, so the system demos deterministically without a key and upgrades to a live
+LLM by adding one env var — no other file changes.
 
 ---
 
@@ -54,20 +51,20 @@ The first working version had the entire agent brain in `src/agent/`:
 | `guardrails.js` | PII block, scope block, refund limit | Safety & human-in-the-loop |
 | `llm.js` | Demo composer ⟷ live Groq | LLM abstraction |
 
-Key early decisions worth defending in an interview:
+Key early decisions and the reasoning behind them:
 
 - **Keyword retrieval instead of embeddings.** Deliberate. The pipeline *shape*
   (query → rank → top-k → ground the answer) is identical to a production vector-DB
-  setup; keyword scoring just makes the ranking explainable in 10 lines. Saying
-  *"I'd swap `retrieve()` for cosine similarity over embeddings in production —
-  same interface, different scorer"* shows you understand the architecture, not just a library.
+  setup; keyword scoring just makes the ranking explainable in 10 lines. In production,
+  `retrieve()` would swap to cosine similarity over embeddings — same interface,
+  different scorer.
 - **Guardrails are deterministic rules, not AI.** On purpose — a rule can't be
   sweet-talked by prompt injection. The LLM is *downstream* of the safety checks.
 - **Every step `emit()`s a trace event.** The UI's Agent Trace panel is just a consumer
   of these events. That's observability (what LangSmith/Langfuse sell) built in from day one.
 - **ORD-1003 costs ₹54,999 on purpose.** It exceeds the ₹5,000 auto-refund limit, so asking
-  for a refund on it triggers the guardrail → ticket → human escalation chain. A scripted
-  "wow moment" for demos.
+  for a refund on it triggers the guardrail → ticket → human escalation chain. A one-click demonstration of
+  the full escalation chain.
 
 ---
 
@@ -100,7 +97,7 @@ useEffect(() => { scrollToBottom() }, [messages])
 ![First successful render after the fix](docs/img/first-working-render.png)
 *The same app, one `{ }` later.*
 
-**Lessons (gold in interviews):**
+**Lessons:**
 - `useEffect`'s return value has a *meaning* (cleanup). Implicit arrow returns are a trap.
 - **A passing build ≠ a working app.** Builds check syntax; only runtime checks behavior.
   This is why the project got a Playwright smoke test that runs the app in a real browser
@@ -252,7 +249,7 @@ content: article.content.replaceAll('{{store}}', getSettings().storeName)
 *Verification run: store renamed to "Volt Electronics" in settings → the very next warranty
 answer says "All Volt Electronics products…". Also visible: the multi-line composer.*
 
-**Design decision worth defending:** old chat messages do **not** retroactively change
+**Design decision:** old chat messages do **not** retroactively change
 (a chat is an immutable record), and product names like "Nimbus X1" stay fixed
 (renaming a store doesn't rename its product catalog). Knowing *where the rename should
 stop* is the interesting part.
@@ -292,33 +289,34 @@ question that started this whole project.
 
 ---
 
-## 📚 Chapter 7 — The interview cheat-sheet
+## 📚 Chapter 7 — Design Q&A
 
-**"Walk me through the architecture."**
+**How does it work end-to-end?**
 > Browser-only React app. User message → guardrails (deterministic, pre-LLM) → intent
 > classification → RAG retrieval over a knowledge base → tool execution with a
 > human-in-the-loop policy gate → grounded reply generation behind an LLM abstraction.
 > Every step emits a trace event that powers a live observability panel.
 
-**"Why isn't the retrieval semantic?"**
+**Why isn't the retrieval semantic?**
 > Same pipeline shape as production (query → rank → top-k → ground), explainable scorer.
 > Swapping in embeddings + cosine similarity changes one function, not the architecture.
 
-**"How do you stop prompt injection?"**
+**How is prompt injection handled?**
 > Guardrails run *before and outside* the LLM and are plain code — they can't be persuaded.
 > The refund limit is enforced in the tool layer too, so even a jailbroken reply can't
 > move money; it can only *say* things.
 
-**"What was the hardest bug?"**
-> Tell the `useEffect` story (Chapter 2): invisible crash, passing build, headless-browser
-> diagnosis, one-brace fix, and the regression test that came out of it.
+**What was the hardest bug?**
+> The `useEffect` blank screen (Chapter 2): an invisible crash behind a passing build,
+> diagnosed with a headless browser, fixed with one pair of braces — and it produced the
+> regression test that protected every later change.
 
-**"What would you do next?"**
-> v1.1: backend proxy so live-LLM mode is safe on the public site. Then project 2: an
-> evaluation dashboard consuming the 👍/👎 feedback this app already collects — because
-> an agent you can't measure is an agent you can't improve.
+**What's next?**
+> v1.1: a backend proxy so live-LLM mode is safe on the public site. Then an evaluation
+> dashboard consuming the 👍/👎 feedback this app already collects — because an agent you
+> can't measure is an agent you can't improve.
 
-### The patterns this project taught (name-droppable)
+### Patterns used in this project
 
 | Pattern | Where |
 |---|---|
@@ -332,7 +330,7 @@ question that started this whole project.
 | Stick-to-bottom scrolling | `ChatPanel.jsx` / `RightPanel.jsx` |
 | CSS-variable theming | `styles.css` + `data-theme` |
 | Priority-based responsive degradation | media queries in `styles.css` |
-| useEffect cleanup semantics | Chapter 2, forever burned in memory |
+| useEffect cleanup semantics | Chapter 2 |
 
 ---
 
