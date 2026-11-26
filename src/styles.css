@@ -124,6 +124,7 @@ body::before {
 }
 .reset-btn:hover:not(:disabled) { border-color: var(--accent); background: #818cf818; }
 .reset-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.export-btn { font-size: 12px; } /* the header export button, slightly tighter than ⟳ New chat */
 
 /* ---------- Layout ---------- */
 .layout {

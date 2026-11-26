@@ -82,8 +82,12 @@ prompt forbids answering outside the provided context (anti-hallucination);
 if the API fails it gracefully degrades to the composer instead of crashing.
 
 ### `src/App.jsx` — React state owner
-Holds `messages`, `traceEvents`, `isThinking`. Demonstrates one-way data flow:
+Holds `messages`, `traceEvents`, `isThinking`, and the session's `feedback`
+(messageId → 👍/👎, null when untoggled). Demonstrates one-way data flow:
 state lives at the top, flows down as props, events bubble up via callbacks.
+**New:** the header's user-initiated **Export feedback** button calls
+`downloadFeedbackExport()` from `src/exportFeedback.js` to export the rated
+replies as an AgentEval-compatible JSON file.
 
 ### `src/components/ChatPanel.jsx` — chat UI
 Welcome hero with one-click demo cards, message bubbles with timestamps,
@@ -92,7 +96,21 @@ typewriter effect on new replies (simulates LLM token streaming — one
 indicator, input form. Shows optimistic UI (user bubble renders before the
 agent finishes) and auto-scroll via `useRef` + `useEffect`.
 **Talking point on feedback:** "Every reply collects thumbs up/down — that's
-the labelled data an evaluation pipeline needs, which is my next project."
+the labelled data an evaluation pipeline needs. The header button
+('Export feedback') turns the rated replies into an AgentEval-importable
+JSON file, so the labelled data is actually portable."
+
+### `src/exportFeedback.js` — user-initiated feedback export
+`buildFeedbackExport({ messages, feedback })` turns the session's rated
+replies into the AgentEval **Import feedback** format
+(`version: 1` + a `feedback` array of `{ id, rating, prompt, response,
+timestamp }` — every timestamp is ISO 8601 *with* a timezone, and `id`s are
+unique, per the dashboard's `FEEDBACK_IMPORT.md` and `parseFeedbackImport`).
+`downloadFeedbackExport()` serializes it and triggers the browser download
+via a Blob + `<a download>` click. The export is user-initiated: the download
+only starts when the user clicks the header button, and it contains
+conversation data (rated prompts, replies, IDs, timestamps). Unit tests in
+`src/exportFeedback.test.js` pin the shape so it always imports cleanly.
 
 ### `src/components/RightPanel.jsx` — observability UI (3 tabs)
 🔬 **Trace** renders the emitted trace events with per-type colors and JSON

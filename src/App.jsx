@@ -14,6 +14,7 @@ import Logo from './components/Logo.jsx'
 import { runAgent } from './agent/agent.js'
 import { hasLiveLLM } from './agent/llm.js'
 import { getSettings, saveSettings } from './settings.js'
+import { downloadFeedbackExport } from './exportFeedback.js'
 
 /** Small modal for editing settings (currently: the store Aura works for). */
 function SettingsModal({ settings, onSave, onClose }) {
@@ -117,6 +118,20 @@ export default function App() {
     setFeedback(prev => ({ ...prev, [messageId]: prev[messageId] === value ? null : value }))
   }
 
+  const [exporting, setExporting] = useState(false)
+
+  /** User-initiated export of the session's rated replies as a JSON file in
+   *  AgentEval's import format (downloads; contains conversation data). */
+  function handleExportFeedback() {
+    if (exporting) return
+    setExporting(true)
+    const exportData = downloadFeedbackExport({ messages, feedback })
+    // Debug aid: check the browser console after clicking the button.
+    console.log('[AuraDesk] Export feedback clicked — records:', exportData.feedback.length)
+    setTimeout(() => setExporting(false), 1200)
+    return exportData
+  }
+
   /** Start over: wipe the whole session. */
   function handleReset() {
     if (isThinking) return
@@ -159,6 +174,14 @@ export default function App() {
             {settings.theme === 'dark' ? '☀️' : '🌙'}
           </button>
           <button className="icon-btn" onClick={() => setShowSettings(true)} title="Settings">⚙️</button>
+          <button
+            className="reset-btn export-btn"
+            onClick={handleExportFeedback}
+            disabled={exporting}
+            title="Export your rated conversation replies as a JSON file — user-initiated; the file contains conversation data (prompts, replies, ratings, timestamps)"
+          >
+            ⬇️ {exporting ? 'Exporting…' : 'Export feedback'}
+          </button>
           <button className="reset-btn" onClick={handleReset} disabled={isThinking} title="Start a new conversation">
             ⟳ New chat
           </button>

@@ -4,7 +4,7 @@
 
 Meet **Aura**: an agentic AI support system (demo'd on the fictional store *Nimbus Gear*) that doesn't just chat — it **retrieves knowledge (RAG), calls tools, enforces guardrails, and escalates to humans**, with a live trace panel showing every internal step.
 
-**UI highlights:** animated aurora background, glassmorphism panels, welcome hero with one-click demos, typewriter "token streaming" replies, tabbed Trace / Actions / Knowledge panel, live session stats, and 👍/👎 feedback on every answer (the seed data for my eval-dashboard project).
+**UI highlights:** animated aurora background, glassmorphism panels, welcome hero with one-click demos, typewriter "token streaming" replies, tabbed Trace / Actions / Knowledge panel, live session stats, 👍/👎 feedback on every answer, and a user-initiated **Export feedback** button in the header that downloads your rated replies as an AgentEval-compatible JSON file (see `src/exportFeedback.js`).
 
 
 ## ✨ What it demonstrates
